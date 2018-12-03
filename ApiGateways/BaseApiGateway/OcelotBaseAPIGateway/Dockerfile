@@ -1,0 +1,19 @@
+FROM microsoft/dotnet:2.1-aspnetcore-runtime AS base
+WORKDIR /app
+EXPOSE 80
+
+FROM microsoft/dotnet:2.1-sdk AS build
+WORKDIR /src
+COPY ["ApiGateways/BaseApiGateway/OcelotBaseAPIGateway/OcelotBaseAPIGateway.csproj", "ApiGateways/BaseApiGateway/OcelotBaseAPIGateway/"]
+RUN dotnet restore "ApiGateways/BaseApiGateway/OcelotBaseAPIGateway/OcelotBaseAPIGateway.csproj"
+COPY . .
+WORKDIR "/src/ApiGateways/BaseApiGateway/OcelotBaseAPIGateway"
+RUN dotnet build "OcelotBaseAPIGateway.csproj" -c Release -o /app
+
+FROM build AS publish
+RUN dotnet publish "OcelotBaseAPIGateway.csproj" -c Release -o /app
+
+FROM base AS final
+WORKDIR /app
+COPY --from=publish /app .
+ENTRYPOINT ["dotnet", "OcelotBaseAPIGateway.dll"]

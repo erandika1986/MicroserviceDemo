@@ -1,0 +1,6 @@
+Enable-Migrations
+
+Add-Migration EMP0000001 -Context EmployeeContext
+Update-Database -Context EmployeeContext
+
+

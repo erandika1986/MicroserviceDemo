@@ -1,0 +1,7 @@
+Enable-Migrations
+
+Add-Migration DEPT0000001 -Context DepartmentContext
+Update-Database -Context DepartmentContext
+
+
+
