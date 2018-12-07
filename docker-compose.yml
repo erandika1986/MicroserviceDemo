@@ -19,47 +19,49 @@ services:
       - backend
 
   auth.api:
-    image: ${DOCKER_REGISTRY}authapi
+    image: demo/auth.api:${TAG:-latest}
     build:
       context: .
       dockerfile: Services/Auth/Auth.API/Dockerfile
-    environment:
-      - ConnectionString=${ESHOP_AZURE_CATALOG_DB:-Server=10.0.75.1,1455;Database=MicroserviceDemo.Services.AuthDb;User Id=sa;Password=ProductApi(!);MultipleActiveResultSets=True}
     networks:
       - backend
       - frontend
     depends_on:
       - sql.data
-    ports:
-      - "4001:80"
+
 
   department.api:
-    image: ${DOCKER_REGISTRY}departmentapi
+    image: demo/department.api:${TAG:-latest}
     build:
       context: .
       dockerfile: Services/Department/Department.API/Dockerfile
-    environment:
-      - ConnectionString=${ESHOP_AZURE_CATALOG_DB:-Server=10.0.75.1,1455;Database=MicroserviceDemo.Services.DepartmentDb;User Id=sa;Password=ProductApi(!);MultipleActiveResultSets=True}
     networks:
       - backend
       - frontend
     depends_on:
       - sql.data
-    ports:
-      - "4002:80"
+
 
   employee.api:
-    image: ${DOCKER_REGISTRY}employeeapi
+    image: demo/employee.api:${TAG:-latest}
     build:
       context: .
       dockerfile: Services/Employee/Employee.API/Dockerfile
-    environment:
-      - ConnectionString=${ESHOP_AZURE_CATALOG_DB:-Server=10.0.75.1,1455;Database=MicroserviceDemo.Services.EmployeeDb;User Id=sa;Password=ProductApi(!);MultipleActiveResultSets=True}
     networks:
       - backend
       - frontend
     depends_on:
       - sql.data
-    ports:
-      - "4003:80"
+
+
+  loginapigateway:
+    image: demo/ocelotapigw:${TAGE:-latest}
+    build:
+      context: .
+      dockerfile: ApiGateways/BaseApiGateway/OcelotBaseAPIGateway/Dockerfile
+    depends_on:
+      - sql.data
+      - auth.api
+      - department.api
+      - employee.api
 

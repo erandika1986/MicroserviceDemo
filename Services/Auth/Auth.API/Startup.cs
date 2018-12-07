@@ -9,6 +9,7 @@ using Auth.API.Infrastructure.Filters;
 using Auth.API.Models;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
@@ -31,14 +32,15 @@ namespace Auth.API
 
         public IConfiguration Configuration { get; }
 
-        // This method gets called by the runtime. Use this method to add services to the container.
+
+        //This method gets called by the runtime.Use this method to add services to the container.
         public IServiceProvider ConfigureServices(IServiceCollection services)
         {
             services
                 .AddCustomMVC(Configuration)
                 .AddCustomDbContext(Configuration)
-                .AddCustomIdentity(Configuration)
-                .ConfigureAuthService(Configuration)
+                .EnableJWTAuthentication(Configuration)
+                .EnableEFStores(Configuration)
                 .AddSwagger();
 
             var container = new ContainerBuilder();
@@ -47,7 +49,7 @@ namespace Auth.API
             return new AutofacServiceProvider(container.Build());
         }
 
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
+        //This method gets called by the runtime.Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
         {
             var pathBase = Configuration["PATH_BASE"];
@@ -89,11 +91,13 @@ namespace Auth.API
             return services;
         }
 
-        public static IServiceCollection AddCustomIdentity(this IServiceCollection services, IConfiguration configuration)
+        public static IServiceCollection EnableEFStores(this IServiceCollection services, IConfiguration configuration)
         {
-            services.AddIdentity<ApplicationUser, IdentityRole>()
-                .AddEntityFrameworkStores<ApplicationDbContext>()
-                .AddDefaultTokenProviders();
+            services.AddIdentity<ApplicationUser, IdentityRole>(cfg =>
+            {
+                cfg.User.RequireUniqueEmail = true;
+            })
+            .AddEntityFrameworkStores<ApplicationDbContext>();
 
             return services;
         }
@@ -117,26 +121,31 @@ namespace Auth.API
             return services;
         }
 
-        public static IServiceCollection ConfigureAuthService(this IServiceCollection services, IConfiguration configuration)
+        public static IServiceCollection EnableJWTAuthentication(this IServiceCollection services, IConfiguration configuration)
         {
-            services.AddAuthentication()
-                .AddCookie(cfg => cfg.SlidingExpiration = true)
-                .AddJwtBearer(options =>
+            services.AddAuthentication
+                (cfg =>
                 {
-                    options.RequireHttpsMetadata = false;
-                    options.SaveToken = true;
+                    cfg.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                    cfg.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+                })
+           .AddJwtBearer(options =>
+           {
+               options.TokenValidationParameters = new TokenValidationParameters
+               {
+                   ValidateIssuer = true,
+                   ValidateAudience = true,
+                   ValidateLifetime = true,
+                   ValidateIssuerSigningKey = true,
 
-                    options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters()
-                    {
-                        ValidIssuer = configuration["Tokens:Issuer"],
-                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["Tokens:Key"])),
-                        ValidAudiences = new List<string>
-                        {
-                            "employee",
-                            "department"
-                        }
-                    };
-                });
+                   ValidIssuer = configuration["Tokens:Issuer"],
+                   ValidAudiences = new List<string>
+                   {
+                       "employee","department"
+                   },
+                   IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["Tokens:Key"]))
+               };
+           });
 
             return services;
         }

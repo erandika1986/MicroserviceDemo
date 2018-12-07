@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Department.API.Data;
 using Department.API.Models;
 using Department.API.ViewModel;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -13,6 +14,7 @@ using Microsoft.Extensions.Options;
 
 namespace Department.API.Controllers
 {
+    [Authorize]
     [Route("api/v1/[controller]")]
     [ApiController]
     public class DepartmentController : ControllerBase
@@ -27,6 +29,7 @@ namespace Department.API.Controllers
             ((DbContext)context).ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
         }
 
+        [Authorize]
         [HttpGet]
         [Route("departments")]
         [ProducesResponseType(typeof(PaginatedItemsViewModel<DepartmentModel>), (int)HttpStatusCode.OK)]
@@ -52,6 +55,7 @@ namespace Department.API.Controllers
             return Ok(model);
         }
 
+        [Authorize]
         [HttpGet]
         [Route("department/{id:int}")]
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
@@ -64,7 +68,7 @@ namespace Department.API.Controllers
             }
             var department = await _departmentContext.Departments.SingleOrDefaultAsync(d => d.Id == id);
 
-            if(department!=null)
+            if (department != null)
             {
                 return Ok(department);
             }
@@ -72,6 +76,100 @@ namespace Department.API.Controllers
             return NotFound();
         }
 
+        [Authorize]
+        [HttpGet]
+        [Route("employeedepartments/{employeeid:int}")]
+        [ProducesResponseType((int)HttpStatusCode.NotFound)]
+        [ProducesResponseType(typeof(IEnumerable<DepartmentModel>), (int)HttpStatusCode.OK)]
+        public async Task<IActionResult> GetEmployeeAssignedDepartment(int employeeid)
+        {
+            var departments = await _departmentContext.DepartmentEmployees.Where(t => t.EmployeeId == employeeid).Select(t => t.Department).ToListAsync();
+
+            return Ok(departments);
+        }
+
+
+
+        [Authorize]
+        [HttpPost]
+        [Route("department")]
+        [ProducesResponseType((int)HttpStatusCode.Created)]
+        public async Task<IActionResult> CreateDepartment([FromBody]DepartmentModel department)
+        {
+            var item = new DepartmentModel()
+            {
+                IsActive = true,
+                Name = department.Name
+            };
+
+            _departmentContext.Departments.Add(item);
+
+            await _departmentContext.SaveChangesAsync();
+
+            return CreatedAtAction(nameof(GetDepartmentById), new { id = item.Id }, null);
+        }
+
+        [Authorize]
+        [HttpPost]
+        [Route("assignemployeedepartments")]
+        [ProducesResponseType(typeof(ResposeViewModel), (int)HttpStatusCode.OK)]
+        public async Task<IActionResult> AssignEmployeeDepartments([FromBody]EmployeeDepartmentViewModel vm)
+        {
+            var response = new ResposeViewModel();
+
+            try
+            {
+                foreach (var deptId in vm.DepartmentIds)
+                {
+                    var ed = new DepartmentEmployeeModel()
+                    {
+                        DepartmentId = deptId,
+                        EmployeeId = vm.EmployeeId,
+                        AssignedDate = DateTime.UtcNow,
+                        IsActive=true
+                    };
+
+                    _departmentContext.Add(ed);
+
+                    await _departmentContext.SaveChangesAsync();
+                }
+
+                response.IsSuccess = true;
+            }
+            catch(Exception ex)
+            {
+                response.Message = ex.ToString();
+            }
+
+            return Ok(response);
+        }
+
+
+
+        [Authorize]
+        [Route("id")]
+        [HttpDelete]
+        [ProducesResponseType((int)HttpStatusCode.NoContent)]
+        public async Task<IActionResult> DeleteDepartment(int id)
+        {
+            var department = _departmentContext.Departments.SingleOrDefault(d => d.Id == id);
+
+            if (department == null)
+            {
+                return NotFound();
+            }
+
+            foreach (var de in department.DepartmentEmployees)
+            {
+                _departmentContext.DepartmentEmployees.Remove(de);
+            }
+
+            _departmentContext.Departments.Remove(department);
+
+            await _departmentContext.SaveChangesAsync();
+
+            return NoContent();
+        }
 
 
         private IActionResult GetItemsByIds(string ids)

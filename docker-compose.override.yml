@@ -4,19 +4,33 @@ services:
   auth.api:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionString=${ESHOP_AZURE_CATALOG_DB:-Server=10.0.75.1,1455;Database=MicroserviceDemo.Services.AuthDb;User Id=sa;Password=ProductApi(!);MultipleActiveResultSets=True}
     ports:
-      - "80"
+      - "4001:80"
 
   department.api:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionString=${ESHOP_AZURE_CATALOG_DB:-Server=10.0.75.1,1455;Database=MicroserviceDemo.Services.DepartmentDb;User Id=sa;Password=ProductApi(!);MultipleActiveResultSets=True}
     ports:
-      - "80"
+      - "4002:80"
 
 
   employee.api:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionString=${ESHOP_AZURE_CATALOG_DB:-Server=10.0.75.1,1455;Database=MicroserviceDemo.Services.EmployeeDb;User Id=sa;Password=ProductApi(!);MultipleActiveResultSets=True}
     ports:
-      - "80"
+      - "4003:80"
+
+
+
+
+  loginapigateway:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+    ports:
+      - "4000:80"
+    volumes:
+      - ./ApiGateways/Login.Bff/apigw:${DEMO_OCELOT_VOLUME_SPEC:-/app/configuration}
 

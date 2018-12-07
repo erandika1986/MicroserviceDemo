@@ -8,6 +8,7 @@ using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using Employee.API.Data;
 using Employee.API.Infrastructure.Filters;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -37,7 +38,7 @@ namespace Employee.API
             services.AddCustomMVC(Configuration)
                 .AddCustomDbContext(Configuration)
                 .AddCustomOptions(Configuration)
-                .ConfigureAuthService(Configuration)
+                .EnableJWTAuthentication(Configuration)
                 .AddSwagger();
 
             var container = new ContainerBuilder();
@@ -157,22 +158,31 @@ namespace Employee.API
 
         }
 
-        public static IServiceCollection ConfigureAuthService(this IServiceCollection services, IConfiguration configuration)
+        public static IServiceCollection EnableJWTAuthentication(this IServiceCollection services, IConfiguration configuration)
         {
-            services.AddAuthentication()
-                .AddCookie(cfg => cfg.SlidingExpiration = true)
-                .AddJwtBearer(options =>
+            services.AddAuthentication
+                (cfg =>
                 {
-                    options.RequireHttpsMetadata = false;
-                    options.SaveToken = true;
+                    cfg.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                    cfg.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+                })
+           .AddJwtBearer(options =>
+           {
+               options.TokenValidationParameters = new TokenValidationParameters
+               {
+                   ValidateIssuer = true,
+                   ValidateAudience = true,
+                   ValidateLifetime = true,
+                   ValidateIssuerSigningKey = true,
 
-                    options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters()
-                    {
-                        ValidIssuer = configuration["Tokens:Issuer"],
-                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["Tokens:Key"])),
-                        ValidAudience = "employee"
-                    };
-                });
+                   ValidIssuer = configuration["Tokens:Issuer"],
+                   ValidAudiences = new List<string>
+                   {
+                       "employee","department"
+                   },
+                   IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["Tokens:Key"]))
+               };
+           });
 
             return services;
         }

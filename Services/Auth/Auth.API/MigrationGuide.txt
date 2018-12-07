@@ -1,0 +1,7 @@
+Enable-Migrations
+
+Add-Migration APP0000001 -Context ApplicationDbContext
+Update-Database -Context ApplicationDbContext
+
+
+
