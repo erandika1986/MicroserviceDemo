@@ -1,11 +1,13 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Swashbuckle.AspNetCore.Swagger;
-using Swashbuckle.AspNetCore.SwaggerGen;
-using System.Collections.Generic;
-using System.Linq;
+﻿
 
-namespace Employee.HttpAggregator.Filters
+namespace Mobile.HttpAggregator.Filters
 {
+    using Microsoft.AspNetCore.Authorization;
+    using Swashbuckle.AspNetCore.Swagger;
+    using Swashbuckle.AspNetCore.SwaggerGen;
+    using System.Collections.Generic;
+    using System.Linq;
+
     public class AuthorizeCheckOperationFilter : IOperationFilter
     {
         public void Apply(Operation operation, OperationFilterContext context)
@@ -22,7 +24,7 @@ namespace Employee.HttpAggregator.Filters
                 operation.Security = new List<IDictionary<string, IEnumerable<string>>>();
                 operation.Security.Add(new Dictionary<string, IEnumerable<string>>
                 {
-                    { "oauth2", new [] { "MicroserviceDemo.Mobile.HttpAggregator" } }
+                    { "oauth2", new [] { "Microsoft.eShopOnContainers.Mobile.Shopping.HttpAggregator" } }
                 });
             }
         }
