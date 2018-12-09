@@ -24,13 +24,26 @@ services:
       - "4003:80"
 
 
-
-
-  loginapigateway:
+  mobileapigateway:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
     ports:
-      - "4000:80"
+      - "4100:80"
     volumes:
-      - ./ApiGateways/Login.Bff/apigw:${DEMO_OCELOT_VOLUME_SPEC:-/app/configuration}
+      - ./ApiGateways/Mobile.Bff/apigw:${DEMO_OCELOT_VOLUME_SPEC:-/app/configuration}
+
+  webapigateway:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+    ports:
+      - "4101:80"
+    volumes:
+      - ./ApiGateways/Mobile.Bff/apigw:${DEMO_OCELOT_VOLUME_SPEC:-/app/configuration}
+
+
+  mobileagg:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+    ports:
+      - "4200:80"
 

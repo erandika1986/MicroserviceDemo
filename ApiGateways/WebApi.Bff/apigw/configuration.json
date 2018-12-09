@@ -1,19 +1,67 @@
 ﻿{
-    "ReRoutes": [
-      {
-        "DownstreamPathTemplate": "/api/{version}/{everything}",
-        "DownstreamScheme": "http",
-        "DownstreamHostAndPorts": [
-          {
-            "Host": "auth.api",
-            "Port": 80
-          }
-        ],
-        "UpstreamPathTemplate": "/api/{version}/l/{everything}",
-        "UpstreamHttpMethod": []
+  "ReRoutes": [
+    {
+      "DownstreamPathTemplate": "/api/{version}/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "10.0.75.1",
+          "Port": 4001
+        }
+      ],
+      "UpstreamPathTemplate": "/api/{version}/l/{everything}",
+      "UpstreamHttpMethod": []
+    },
+    {
+      "DownstreamPathTemplate": "/api/{version}/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "10.0.75.1",
+          "Port": 4003
+        }
+      ],
+      "UpstreamPathTemplate": "/api/{version}/e/{everything}",
+      "UpstreamHttpMethod": [],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "IdentityApiKey",
+        "AllowedScopes": []
       }
-  
-    ],
+    },
+    {
+      "DownstreamPathTemplate": "/api/{version}/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "10.0.75.1",
+          "Port": 4002
+        }
+      ],
+      "UpstreamPathTemplate": "/api/{version}/d/{everything}",
+      "UpstreamHttpMethod": [],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "IdentityApiKey",
+        "AllowedScopes": []
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "10.0.75.1",
+          "Port": 4004
+        }
+      ],
+      "UpstreamPathTemplate": "/{everything}",
+      "UpstreamHttpMethod": [ "POST", "GET" ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "IdentityApiKey",
+        "AllowedScopes": []
+      }
+    }
+
+  ],
     "GlobalConfiguration": {
       "RequestIdKey": "OcRequestId",
       "AdministrationPath": "/administration"

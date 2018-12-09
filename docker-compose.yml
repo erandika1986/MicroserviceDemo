@@ -54,11 +54,34 @@ services:
       - sql.data
 
 
-  loginapigateway:
+  mobileapigateway:
     image: demo/ocelotapigw:${TAGE:-latest}
     build:
       context: .
       dockerfile: ApiGateways/BaseApiGateway/OcelotBaseAPIGateway/Dockerfile
+    depends_on:
+      - sql.data
+      - auth.api
+      - department.api
+      - employee.api
+
+  webapigateway:
+    image: demo/ocelotapigw:${TAGE:-latest}
+    build:
+      context: .
+      dockerfile: ApiGateways/BaseApiGateway/OcelotBaseAPIGateway/Dockerfile
+    depends_on:
+      - sql.data
+      - auth.api
+      - department.api
+      - employee.api
+
+
+  mobileagg:
+    image: ${DOCKER_REGISTRY}mobilehttpaggregator
+    build:
+      context: .
+      dockerfile: ApiGateways/Mobile.Bff/Mobile.HttpAggregator/Dockerfile
     depends_on:
       - sql.data
       - auth.api

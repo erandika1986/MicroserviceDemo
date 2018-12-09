@@ -53,7 +53,7 @@ namespace OcelotBaseAPIGateway
                         ValidIssuer = Configuration["Tokens:Issuer"],
                         ValidAudiences = new List<string>
                         {
-                            "employee","department"
+                            "employee","department","mobileagg"
                         },
                         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["Tokens:Key"]))
                     };
