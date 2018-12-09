@@ -78,7 +78,7 @@ services:
 
 
   mobileagg:
-    image: ${DOCKER_REGISTRY}mobilehttpaggregator
+    image: demo/mobileagg:${TAGE:-latest}
     build:
       context: .
       dockerfile: ApiGateways/Mobile.Bff/Mobile.HttpAggregator/Dockerfile

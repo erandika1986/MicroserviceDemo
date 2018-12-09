@@ -50,7 +50,7 @@
       "DownstreamHostAndPorts": [
         {
           "Host": "10.0.75.1",
-          "Port": 4004
+          "Port": 4200
         }
       ],
       "UpstreamPathTemplate": "/{everything}",

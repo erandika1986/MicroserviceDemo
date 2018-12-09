@@ -38,7 +38,7 @@ services:
     ports:
       - "4101:80"
     volumes:
-      - ./ApiGateways/Mobile.Bff/apigw:${DEMO_OCELOT_VOLUME_SPEC:-/app/configuration}
+      - ./ApiGateways/WebApi.Bff/apigw:${DEMO_OCELOT_VOLUME_SPEC:-/app/configuration}
 
 
   mobileagg:
